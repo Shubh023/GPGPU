@@ -5,13 +5,24 @@ project(irgpu LANGUAGES CXX CUDA
               DESCRIPTION "Implementation of the LBP algorithm.")
 
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(NOT DEFINED CMAKE_CUDA_STANDARD)
     set(CMAKE_CUDA_STANDARD 11)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 endif()
+
+find_package(OpenCV REQUIRED core imgcodecs highgui)
+
+if(OpenCV_FOUND)
+    message(STATUS "    config: ${OpenCV_DIR}")
+    message(STATUS "    version: ${OpenCV_VERSION}")
+    message(STATUS "    libraries: ${OpenCV_LIBS}")
+    message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
+endif(OpenCV_FOUND)
+
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -pg")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
