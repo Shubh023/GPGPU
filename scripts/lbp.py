@@ -66,7 +66,7 @@ def assign_clusters(descriptors):
 def main():
     img = cv2.imread("resources/beans.jpg", cv2.IMREAD_GRAYSCALE)
     patches = extract_patches(img)
-    p_textons = np.array([extract_textons(p) for p in patches[:100]])
+    p_textons = np.array([extract_textons(p) for p in patches])
     descriptors = np.array([hist_from_texton(t) for t in p_textons])
     pred, centroids = assign_clusters(descriptors)
     print(centroids.shape, centroids.dtype)

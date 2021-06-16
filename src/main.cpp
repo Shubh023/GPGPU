@@ -10,6 +10,5 @@ int main(int argc, char const *argv[]) {
     auto centroids = lbp::load_descriptors("../resources/centroids.txt");
 
     auto pred = lbp::assign_clusters(descriptors, centroids);
-    for (auto x : pred)
-        std::cout << x << "\n";
+    lbp::save_pred(pred, "../resources/pred_cpp.txt");
 }

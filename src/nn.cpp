@@ -62,5 +62,10 @@ std::vector<int> assign_clusters(const std::vector<histogram_t>& descriptors,
     return res;
 }
 
+void save_pred(const std::vector<int>& pred, std::string filename) {
+    std::ofstream output(filename);
+    for (auto centroid : pred)
+        output << centroid << "\n";
+}
 
 }

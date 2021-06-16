@@ -16,4 +16,6 @@ int nearest_centroid(histogram_t desc, const std::vector<histogram_t>& centroids
 std::vector<int> assign_clusters(const std::vector<histogram_t>& descriptors, 
                                  const std::vector<histogram_t>& centroids);
 
+void save_pred(const std::vector<int>& pred, std::string filename);
+
 }
