@@ -6,12 +6,12 @@
 
 namespace lbp {
 
-    using histogram = std::array<uint8_t, 256>;
+    using histogram_t = std::array<uint8_t, 256>;
 
     const int patch_size = 16;
 
-    uint8_t extract_texton(const cv::Mat& img, int x, int y);
-    histogram hist(const std::array<uint8_t, 256>& textons);
-    std::vector<histogram> lbp(const cv::Mat& img);
+    std::array<uint8_t, 256> extract_textons(const cv::Mat& patch);
+    histogram_t hist(const std::array<uint8_t, 256>& textons);
+    std::vector<histogram_t> lbp(const cv::Mat& img);
 
 }

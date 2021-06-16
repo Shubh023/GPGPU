@@ -9,11 +9,11 @@
 namespace lbp {
 
 
-uint8_t extract_texton(const cv::Mat& img, int x, int y) {
-    return 0;
+std::array<uint8_t, 256> extract_textons(const cv::Mat& patch) {
+    return std::array<uint8_t, 256>{ 0 };
 }
 
-histogram hist(const std::array<uint8_t, 256>& textons) {
+histogram_t hist(const std::array<uint8_t, 256>& textons) {
     return std::array<uint8_t, 256>{ 0 };
 }
 
@@ -28,7 +28,7 @@ std::pair<int, int> padding_size(int n, int patch_size) {
     return pad;
 }
 
-std::vector<histogram> lbp(const cv::Mat& img) {
+std::vector<histogram_t> lbp(const cv::Mat& img) {
 
     int rows = img.rows;
     int cols = img.cols;
@@ -41,19 +41,23 @@ std::vector<histogram> lbp(const cv::Mat& img) {
                                  img.depth());
     
     cv::copyMakeBorder(img, padded_img, x_pad.first, x_pad.second,
-                       y_pad.first, y_pad.second, cv::BORDER_REPLICATE);
+                       y_pad.first, y_pad.second, cv::BORDER_CONSTANT, 0);
 
+    std::vector<histogram_t> res;
     int n_x = padded_img.rows / patch_size;
     int n_y = padded_img.cols / patch_size;
 
     for (int i = 0; i < n_x; i++) {
         for (int j = 0; j < n_y; j++) {
-            cv::Rect patch(j * patch_size, i * patch_size, patch_size, patch_size);
-            Mat patch = padded_img(patch));
+            cv::Rect rect(j * patch_size, i * patch_size, patch_size, patch_size);
+            cv::Mat patch = padded_img(rect);
+            std::array<uint8_t, 256> textons = extract_textons(patch);
+            histogram_t histogram = hist(textons);
+            res.push_back(histogram);
         }
     }
 
-    return std::vector<histogram>();
+    return res;
 }
 
 }

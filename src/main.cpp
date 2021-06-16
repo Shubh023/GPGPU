@@ -15,5 +15,5 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    std::vector<lbp::histogram>feature_vector = lbp::lbp(img);
+    std::vector<lbp::histogram_t>feature_vector = lbp::lbp(img);
 }
