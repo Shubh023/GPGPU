@@ -1,4 +1,5 @@
-set(SRC_LBP "lbp.cpp")
+set(SRC_LBP "nn.cpp")
+
 add_library(lbp ${SRC_LBP})
 
 target_include_directories(lbp PUBLIC .)

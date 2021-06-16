@@ -2,18 +2,14 @@
 #include <iostream>
 #include <string>
 
-#include "lbp.hh"
+#include "nn.hh"
 
 int main(int argc, char const *argv[]) {
     
-    std::string image_path = "../resources/beans.jpg";
+    auto descriptors = lbp::load_descriptors("../resources/desc.txt");
+    auto centroids = lbp::load_descriptors("../resources/centroids.txt");
 
-    cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
-    if(img.empty())
-    {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return 1;
-    }
-
-    std::vector<lbp::histogram_t>feature_vector = lbp::lbp(img);
+    auto pred = lbp::assign_clusters(descriptors, centroids);
+    for (auto x : pred)
+        std::cout << x << "\n";
 }

@@ -56,10 +56,11 @@ def hist_from_texton(textons):
     return hist
 
 
-def compute_centroids(descriptors):
-    X_std = StandardScaler().fit_transform(descriptors)
-    kmeans = KMeans(n_clusters=32, random_state=0).fit(X_std)
-    return kmeans.cluster_centers_
+def assign_clusters(descriptors):
+    kmeans = KMeans(n_clusters=32, random_state=0)
+    pred = kmeans.fit_predict(descriptors)
+    return pred, kmeans.cluster_centers_
+
 
 
 def main():
@@ -67,8 +68,12 @@ def main():
     patches = extract_patches(img)
     p_textons = np.array([extract_textons(p) for p in patches[:100]])
     descriptors = np.array([hist_from_texton(t) for t in p_textons])
-    centroids = compute_centroids(descriptors)
-    print(centroids)
+    pred, centroids = assign_clusters(descriptors)
+    print(centroids.shape, centroids.dtype)
+    print(descriptors.shape)
+    np.savetxt("resources/pred_sk.txt", pred, fmt="%u")
+    np.savetxt("resources/centroids.txt", centroids, fmt="%.18f")
+    np.savetxt("resources/desc.txt", descriptors, fmt="%u")
 
 
 main()
