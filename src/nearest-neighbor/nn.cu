@@ -16,7 +16,6 @@ namespace irgpu {
 
 __device__ double squared_L2_distance(double* desc1, double* desc2) {
     double res = 0;
-    printf("Hello from block %d, thread %d\n", blockIdx.x, threadIdx.x);
     for (int i = 0; i < DESC_SIZE; i++) {
         double diff = desc1[i] - desc2[i];
         res += diff * diff;
@@ -33,23 +32,24 @@ __global__ void nearest_centroid(double *descriptors, double *centroids,
     double min_dist = squared_L2_distance(&descriptors[index * DESC_SIZE],
                                           &centroids[0]);    
     int best_centroid = 0;
+    //printf("%f %d\n", min_dist, best_centroid);
 
-    for (int i = 0; i < n_cent ; i++) {
+    for (int i = 1; i < n_cent ; i++) {
         double dist = squared_L2_distance(&descriptors[index * DESC_SIZE],
                                           &centroids[i * DESC_SIZE]);    
         if (dist < min_dist) {
             min_dist = dist;
             best_centroid = i;
+            //printf("%f %d\n", min_dist, i);
         }
     }
 
-    centroids[index] = best_centroid;
+    assignments[index] = best_centroid;
 }
 
 std::vector<int>
 assign_centroids(const std::vector<histogram_t>& h_descriptors, 
                  const std::vector<histogram_t>& h_centroids) {
-
 
     int n_desc = h_descriptors.size();
     double *d_descriptors;
