@@ -1,8 +1,14 @@
-set(SRC_LBP "nn.cpp")
+set(SRC "nearest-neighbor/nn_seq.cpp"
+        "utils/io.cpp"
+)
 
-add_library(lbp ${SRC_LBP})
+add_library(lbp ${SRC})
 
-target_include_directories(lbp PUBLIC .)
+target_include_directories(lbp PUBLIC
+    "lbp"
+    "nearest-neighbor"
+    "utils"    
+)
 
 add_executable(app main.cpp)
 

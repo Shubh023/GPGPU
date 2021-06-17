@@ -6,7 +6,7 @@
 
 #include "lbp.hh"
 
-namespace lbp {
+namespace irgpu {
 
 
 std::array<uint8_t, 256> extract_textons(const cv::Mat& patch) {

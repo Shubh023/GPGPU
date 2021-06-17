@@ -3,17 +3,10 @@
 #include <array>
 #include <vector>
 
-namespace lbp {
+#include "lbp.hh"
 
-using histogram_t = std::array<double, 256>;
 
-/**
- * @brief Load descriptors from a text file to a vector. 
- * 
- * @param file File to load from.
- * @return std::vector<histogram_t> Vector of descriptors.
- */
-std::vector<histogram_t> load_descriptors(std::string file);
+namespace irgpu {
 
 /**
  * @brief Squared euclidean distance between two descriptors.
@@ -40,15 +33,8 @@ int nearest_centroid(histogram_t desc, const std::vector<histogram_t>& centroids
  * @param centroids Vector of centroids.
  * @return std::vector<int> Vector of centroid indexes.
  */
-std::vector<int> assign_clusters(const std::vector<histogram_t>& descriptors, 
-                                 const std::vector<histogram_t>& centroids);
-
-/**
- * @brief Save centroid indexes predictions to a file.
- * 
- * @param pred Vector of centroid indexes.
- * @param filename Output file.
- */
-void save_pred(const std::vector<int>& pred, std::string filename);
+std::vector<int>
+assign_centroids_seq(const std::vector<histogram_t>& descriptors, 
+                     const std::vector<histogram_t>& centroids);
 
 }

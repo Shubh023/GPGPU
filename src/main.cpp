@@ -2,13 +2,14 @@
 #include <iostream>
 #include <string>
 
-#include "nn.hh"
+#include "nearest-neighbor/nn_seq.hh"
+#include "utils/io.hh"
 
 int main(int argc, char const *argv[]) {
     
-    auto descriptors = lbp::load_descriptors("../resources/desc.txt");
-    auto centroids = lbp::load_descriptors("../resources/centroids.txt");
+    auto descriptors = irgpu::load_descriptors("../resources/desc.txt");
+    auto centroids = irgpu::load_descriptors("../resources/centroids.txt");
 
-    auto pred = lbp::assign_clusters(descriptors, centroids);
-    lbp::save_pred(pred, "../resources/pred_cpp.txt");
+    auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
+    irgpu::save_pred(pred, "../resources/pred_cpp.txt");
 }
