@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "lbp.hh"
+#include "../lbp/lbp.hh"
 
 
 namespace irgpu {
