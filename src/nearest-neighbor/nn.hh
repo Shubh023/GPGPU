@@ -4,6 +4,9 @@
 
 #include "../lbp/lbp.hh"
 
+#define DESC_SIZE 256
+
+
 namespace irgpu {
 
 /**
