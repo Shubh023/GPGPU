@@ -20,7 +20,7 @@ int nearest_centroid(histogram_t desc, const std::vector<histogram_t>& centroids
     int best_centroid = -1;
 
     for (int i = 0; i < centroids.size(); i++) {
-        float dist = squared_L2_distance(desc, centroids[i]);    
+        double dist = squared_L2_distance(desc, centroids[i]);    
         if (dist < min_dist) {
             min_dist = dist;
             best_centroid = i;
