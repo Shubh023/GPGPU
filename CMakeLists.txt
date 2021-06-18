@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 if(NOT DEFINED CMAKE_CUDA_STANDARD)
     set(CMAKE_CUDA_STANDARD 14)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    set(CUDA_NVCC_FLAGS -g;-G)
 endif()
 
 find_package(OpenCV REQUIRED core imgcodecs highgui)

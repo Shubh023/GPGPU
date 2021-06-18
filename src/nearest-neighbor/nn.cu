@@ -51,6 +51,7 @@ std::vector<int>
 assign_centroids(const std::vector<histogram_t>& h_descriptors, 
                  const std::vector<histogram_t>& h_centroids) {
 
+    std::cout << "Lancer\n";
     int n_desc = h_descriptors.size();
     double *d_descriptors;
     cudaMalloc(&d_descriptors, n_desc * DESC_SIZE * sizeof(double)); 
@@ -85,8 +86,8 @@ assign_centroids(const std::vector<histogram_t>& h_descriptors,
     cudaMemcpy(&h_assignments[0], d_assignments, n_desc * sizeof(int),
                cudaMemcpyDeviceToHost);
 
-    for (auto val : h_assignments)
-        std::cout << val << " ";
+    //for (auto val : h_assignments)
+    //    std::cout << val << " ";
 
     cudaFree(d_descriptors);
     cudaFree(d_centroids);

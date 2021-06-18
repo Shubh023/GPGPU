@@ -28,6 +28,23 @@ std::vector<histogram_t> load_descriptors(std::string filename) {
     return descriptors;
 }
 
+std::vector<double> load_descriptors_transpose(std::string filename) {
+
+    std::ifstream input(filename);
+    std::vector<double> descriptors_T;
+
+    for(std::string line; std::getline(input, line); ) {
+        std::stringstream in(line);
+
+        double val;
+        while (in >> val) {
+            descriptors_T.push_back(val);
+        }
+    }
+
+    return descriptors_T;
+}
+
 void save_pred(const std::vector<int>& pred, std::string filename) {
     std::ofstream output(filename);
     for (auto centroid : pred)

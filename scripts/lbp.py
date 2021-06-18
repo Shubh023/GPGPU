@@ -73,6 +73,7 @@ def main():
     print(descriptors.shape)
     np.savetxt("resources/pred_sk.txt", pred, fmt="%u")
     np.savetxt("resources/centroids.txt", centroids, fmt="%.18f")
+    np.savetxt("resources/centroids_t.txt", centroids.T, fmt="%.18f")
     np.savetxt("resources/desc.txt", descriptors, fmt="%u")
 
 

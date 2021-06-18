@@ -11,7 +11,9 @@ target_include_directories(nn PUBLIC
 )
 
 # CUDA lib
-add_library(cuda_nn SHARED "nearest-neighbor/nn.cu")
+add_library(cuda_nn SHARED "nearest-neighbor/nn.cu"
+                           "nearest-neighbor/nn2.cu")
+                           
 target_compile_features(cuda_nn PUBLIC cxx_std_14)
 set_target_properties(cuda_nn PROPERTIES
                               CUDA_SEPARABLE_COMPILATION ON
