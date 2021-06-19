@@ -18,10 +18,12 @@ namespace irgpu {
 __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
                       int M, int N, int P) {
 
-    extern __shared__ double tile1[];
-    extern __shared__ double tile2[];
-
     int tile_width = blockDim.x;  // square tile
+
+    // Need to split the shared buffer to use two.
+    extern __shared__ double tiles[];
+    double *tile1 = (double*) tiles;
+    double *tile2 = (double*) &tiles[tile_width * tile_width];
 
     int bx = blockIdx.x;
     int by = blockIdx.y;
@@ -42,6 +44,8 @@ __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
         if ((ty + k * tile_width) < N && col < P) {
             tile2[ty*blockDim.y + tx] = mat2[(ty + k*tile_width)*P + col];  // [ty + patch_shift][col]
         }
+        //printf("%d %d %f %f %f %f\n", p1, p2, tile1[ty*blockDim.y + tx], tile2[ty*blockDim.y + tx],
+        //    mat1[row*N + tx + k*tile_width],mat2[(ty + k*tile_width)*P + col]);
         __syncthreads();
 
         for (int l = 0; l < tile_width; l++) {
@@ -89,6 +93,7 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
     cudaCheckError();
 
     // need to adjust because of shared memory usage -> SM
+    //dim3 block_dim(32, 32);
     dim3 block_dim(32, 32);
     dim3 grid_dim((n_cent + block_dim.x - 1) / block_dim.x,
                   (n_desc + block_dim.y - 1) / block_dim.y);
@@ -97,9 +102,9 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
               << grid_dim.y << "\n"
               << patch_mem << "\n";
 
-    l2_sq<<<grid_dim, block_dim, patch_mem>>>(d_descriptors, d_centroids, 
-                                              d_l2_squared, n_desc, DESC_DIM,
-                                              n_cent);
+    l2_sq<<<grid_dim, block_dim, 2 * patch_mem>>>(d_descriptors, d_centroids, 
+                                                  d_l2_squared, n_desc, DESC_DIM,
+                                                  n_cent);
     cudaDeviceSynchronize();
     cudaCheckError();
 
@@ -110,8 +115,13 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
     //cudaMemcpy(&h_assignments[0], d_assignments, n_desc * sizeof(int),
     //           cudaMemcpyDeviceToHost);
 
-    for (auto val : h_l2_squared)
-        std::cout << val << "\n";
+    int i = 0;
+    for (auto val : h_l2_squared){ 
+        if (i % 32 == 0)
+            std::cout << "\n";
+        std::cout << val << " ";
+        i++;
+    }
 
     cudaFree(d_descriptors);
     cudaFree(d_centroids);
