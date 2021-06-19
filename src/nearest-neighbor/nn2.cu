@@ -44,8 +44,6 @@ __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
         if ((ty + k * tile_width) < N && col < P) {
             tile2[ty*blockDim.y + tx] = mat2[(ty + k*tile_width)*P + col];  // [ty + patch_shift][col]
         }
-        //printf("%d %d %f %f %f %f\n", p1, p2, tile1[ty*blockDim.y + tx], tile2[ty*blockDim.y + tx],
-        //    mat1[row*N + tx + k*tile_width],mat2[(ty + k*tile_width)*P + col]);
         __syncthreads();
 
         for (int l = 0; l < tile_width; l++) {
@@ -59,6 +57,11 @@ __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
         l2_sq[row*P + col] = p_sum;
     }
 }
+
+//__global__ void (double *mat1, double *mat2, double *l2_sq,
+//                      int M, int N, int P) {
+//    return 
+//}
 
 std::vector<int>
 assign_centroids2(const std::vector<histogram_t>& h_descriptors, 
@@ -81,10 +84,10 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
     cudaMalloc(&d_l2_squared, n_desc * n_cent * sizeof(double)); 
     cudaCheckError();
 
-    auto h_assignments = std::vector<int>(n_desc);
-    int *d_assignments;
-    cudaMalloc(&d_assignments, n_desc * sizeof(int)); 
-    cudaCheckError();
+    //auto h_assignments = std::vector<int>(n_desc);
+    //int *d_assignments;
+    //cudaMalloc(&d_assignments, n_desc * sizeof(int)); 
+    //cudaCheckError();
 
     cudaMemcpy(d_descriptors, &h_descriptors[0], n_desc * DESC_DIM * sizeof(double),
                cudaMemcpyHostToDevice);
@@ -115,18 +118,24 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
     //cudaMemcpy(&h_assignments[0], d_assignments, n_desc * sizeof(int),
     //           cudaMemcpyDeviceToHost);
 
-    int i = 0;
-    for (auto val : h_l2_squared){ 
-        if (i % 32 == 0)
-            std::cout << "\n";
-        std::cout << val << " ";
-        i++;
+    std::vector<int> h_assignments;
+    for (int i = 0; i < n_desc; i++) {
+
+        int centroid = 0;
+        double min_dist = h_l2_squared[i * n_cent];
+        for (int j = 1; j < n_cent; j++) { 
+            if (h_l2_squared[i * n_cent + j] < min_dist) {
+                centroid = j;
+                min_dist = h_l2_squared[i * n_cent + j];
+            }
+        }
+        h_assignments.push_back(centroid);
     }
 
     cudaFree(d_descriptors);
     cudaFree(d_centroids);
     cudaFree(d_l2_squared);
-    cudaFree(d_assignments);
+    //cudaFree(d_assignments);
     cudaCheckError();
 
     return h_assignments;
