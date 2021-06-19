@@ -1,14 +1,5 @@
-#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/core/matx.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <vector>
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <assert.h>
 
 #include "lbp.hh"
 
@@ -180,30 +171,6 @@ std::vector<histogram8_t> lbp_seq(const cv::Mat& img) {
             std::cerr << "Missing values in histogram.\n";
         }
     }
-#endif
-
-#ifdef DEBUG
-
-    //std::cout << "Patch 100 :\n";
-    //display(padded(patches.at(100)));
-
-    //std::cout << "Texton 0 of patch 100 :\n";
-    //std::vector<int> texton = patches_texton.at(100).at(0);
-    //for (auto e : texton)
-    //    std::cout << " " << e;
-    //std::cout << std::endl;
-
-    //std::cout << "Histograms :\n";
-    //std::ofstream out("test.csv");
-    //for (auto& h : histograms) {
-    //    for (auto b : h)
-    //        out << b << ';';
-    //    out << '\n';
-    //}
-
-    //for (auto b : histograms[0])
-    //    std::cout << b << ';';
-
 #endif
 
     return histograms;

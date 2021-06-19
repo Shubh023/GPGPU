@@ -27,6 +27,20 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS}) 
 endif()
 
+include(FetchContent)
+
+FetchContent_Declare(
+  GoogleBenchmark
+  URL https://github.com/google/benchmark/archive/v1.5.5.tar.gz
+)
+
+if (NOT GoogleBenchmark_POPULATED)
+  FetchContent_Populate(GoogleBenchmark)
+  set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "From Gtest")
+  set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "From Gtest")
+  add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
+endif()
+
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -pg")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O0 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <opencv2/core/mat.hpp>
+#include <vector>
 
 namespace irgpu {
 

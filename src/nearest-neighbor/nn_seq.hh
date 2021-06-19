@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <vector>
 
 #include "../lbp/lbp.hh"

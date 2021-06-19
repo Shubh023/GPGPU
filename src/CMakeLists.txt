@@ -30,4 +30,5 @@ target_link_libraries(app PUBLIC
     "cuda_nn"
     ${Boost_LIBRARIES}
     ${OpenCV_LIBS}
+    benchmark
 )

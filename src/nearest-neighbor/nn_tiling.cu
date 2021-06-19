@@ -49,7 +49,7 @@ __global__ void l2_sq(uint8_t *mat1, double *mat2, double *l2_sq,
         __syncthreads();
 
         for (int l = 0; l < tile_width; l++) {
-            double diff = tile1[ty*blockDim.y + l] - tile2[l*blockDim.y + tx];
+            double diff = (double) tile1[ty*blockDim.y + l] - tile2[l*blockDim.y + tx];
             p_sum += diff*diff;
         }
         __syncthreads();
