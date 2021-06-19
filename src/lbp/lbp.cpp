@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <assert.h>
 
 #include "lbp.hh"
 
@@ -70,56 +71,34 @@ std::vector<cv::Mat> get_patches(const cv::Mat& img) {
     return patches;
 }
 
-std::vector<int> compared_neighbors(const cv::Mat& cell) {
-    std::vector<int> res;
-    auto cell_center = int(cell.at<uint8_t>(1,1));
-    for (int i = 0; i < cell.rows; ++i) {
-        for (int j = 0; j < cell.cols; ++j) {
-            if (i == 1 && j == 1) {
-                continue;
-            }
-            if (int(cell.at<uint8_t>(i, j)) >= cell_center) {
-                res.push_back(1);
-            } else {
-                res.push_back(0);
-            }
-        }
-    }
-    return res;
-}
-
-std::vector<std::vector<int>> extract_texton(const cv::Mat& patch) {
-    std::vector<std::vector<int>> texton;
-    for (int i = 0; i <= patch.rows - 3; ++i) {
-        for (int j = 0; j <= patch.cols - 3; ++j) {
-            cv::Mat cell = patch(cv::Rect(j, i, 3, 3));
-            std::vector<int> compared_pixels = compared_neighbors(cell);
-            texton.push_back(compared_pixels);
-        }
-    }
-    return texton;
-}
-
-
 std::vector<uint8_t> extract_textons(const cv::Mat& patch) {
     std::vector<uint8_t> textons;
 
     uint8_t m, c;
-    for (unsigned y = 1; y < (patch.rows - 1); y++) {
 
-        for (unsigned x = 1; x < (patch.cols - 1); x++) {
+    for (unsigned x = 1; x < (patch.cols - 1); x++) {
+        for (unsigned y = 1; y < (patch.rows - 1); y++) {
             m = 0;
             c = patch.at<uint8_t>(x, y);
 
-            // calculate 8-bit mask value from neighboringpatch 
+            //std::cout << +patch.at<uint8_t>(x - 1, y - 1) << " ";
+            //std::cout << +patch.at<uint8_t>(x - 1, y    ) << " ";
+            //std::cout << +patch.at<uint8_t>(x - 1, y + 1) << " ";
+            //std::cout << +patch.at<uint8_t>(x,     y - 1) << " ";
+            //std::cout << +patch.at<uint8_t>(x,     y    ) << " ";
+            //std::cout << +patch.at<uint8_t>(x,     y + 1) << " ";
+            //std::cout << +patch.at<uint8_t>(x + 1, y - 1) << " ";
+            //std::cout << +patch.at<uint8_t>(x + 1, y    ) << " ";
+            //std::cout << +patch.at<uint8_t>(x + 1, y + 1) << " ";
+
             m |= (patch.at<uint8_t>(x - 1, y - 1) > c) << 7; // (-1, -1)
-            m |= (patch.at<uint8_t>(x,     y - 1) > c) << 6; // ( 0, -1)
-            m |= (patch.at<uint8_t>(x + 1, y - 1) > c) << 5; // ( 1, -1)
-            m |= (patch.at<uint8_t>(x + 1, y    ) > c) << 4; // ( 1,  0)
-            m |= (patch.at<uint8_t>(x + 1, y + 1) > c) << 3; // ( 1,  1)
-            m |= (patch.at<uint8_t>(x,     y + 1) > c) << 2; // ( 0,  1)
-            m |= (patch.at<uint8_t>(x - 1, y + 1) > c) << 1; // (-1,  1)
-            m |= (patch.at<uint8_t>(x - 1, y    ) > c) << 0; // (-1,  0)
+            m |= (patch.at<uint8_t>(x - 1, y    ) > c) << 6; // (-1,  0)
+            m |= (patch.at<uint8_t>(x - 1, y + 1) > c) << 5; // (-1,  1)
+            m |= (patch.at<uint8_t>(x,     y - 1) > c) << 4; // ( 0, -1)
+            m |= (patch.at<uint8_t>(x,     y + 1) > c) << 3; // ( 0,  1)
+            m |= (patch.at<uint8_t>(x + 1, y - 1) > c) << 2; // ( 1, -1)
+            m |= (patch.at<uint8_t>(x + 1, y    ) > c) << 1; // ( 1,  0)
+            m |= (patch.at<uint8_t>(x + 1, y + 1) > c) << 0; // ( 1,  1)
 
             textons.push_back(m);
         }
@@ -137,38 +116,28 @@ cv::Mat padded(const cv::Mat& patch) {
     return padit;
 }
 
-std::vector<std::vector<std::vector<int>>> 
+std::vector<std::vector<uint8_t>>
 textons_per_patch(const std::vector<cv::Mat>& patches) {
-
-    std::vector<std::vector<std::vector<int>>> patches_textons;
-    for (const auto& patch : patches)
-        patches_textons.push_back(extract_texton(padded(patch)));
+    std::vector<std::vector<uint8_t>> patches_textons;
+    for (const auto& patch : patches) {
+        patches_textons.push_back(extract_textons(padded(patch)));
+    }
     return patches_textons;
 }
 
-int binary_to_int(const std::vector<int>& t) {
-    int sum=0;
-    for(int i=t.size()-1, j=0; i>=0; i--, j++){
-        sum+=t[j]*(1<<i);
-    }
-    return sum;
-}
-
-histogram_t extract_hist(const std::vector<std::vector<int>>& texton) {
-    histogram_t hist;
-    int val = 0;
-    for (const auto& t : texton) {
-        val = binary_to_int(t);
-        hist[255 - val] += 1;
+histogram_t extract_hist(const std::vector<uint8_t>& textons) {
+    histogram_t hist{0};
+    for (uint8_t t : textons) {
+        hist[t] += 1;
     }
     return hist;
 }
 
 std::vector<histogram_t>
-get_histograms(const std::vector<std::vector<std::vector<int>>>& patches_textons) {
+get_histograms(const std::vector<std::vector<uint8_t>>& patches_textons) {
     std::vector<histogram_t> histograms;
-    for (const auto& pt : patches_textons)
-        histograms.push_back(extract_hist(pt));
+    for (const auto& textons : patches_textons)
+        histograms.push_back(extract_hist(textons));
     return histograms;
 }
 
@@ -190,39 +159,50 @@ std::vector<histogram_t> lbp_seq(const cv::Mat& img) {
     std::cout << "Patches Extracted : " <<  patches.size() << std::endl;
 
     // Compute 256 textons of each patches
-    std::vector<std::vector<std::vector<int>>> patches_texton = textons_per_patch(patches);
+    std::vector<std::vector<uint8_t>> patches_texton = textons_per_patch(patches);
     std::cout << "patches_texton shape : ("
                 << patches_texton.size() << ","
-                << int(patches_texton[0].size()) << ","
-                << patches_texton[0][0].size() << ")" << std::endl;
+                << patches_texton[0].size() << ")" << std::endl;
 
     // Compute textons histograms for each patch 
     std::vector<histogram_t> histograms = get_histograms(patches_texton);
     std::cout << "histograms shape : ("
                 << histograms.size() << ","
-                << int(histograms[0].size()) << ")" << std::endl;
+                << histograms[0].size() << ")" << std::endl;
+
+#ifdef DEBUG
+    for (const auto& h : histograms) {
+        uint8_t sum = 0;
+        for (uint8_t val : h) {
+            sum += val;
+        }
+        if (sum != 0) {
+            std::cerr << "Missing values in histogram.\n";
+        }
+    }
+#endif
 
 #ifdef DEBUG
 
-    std::cout << "Patch 100 :\n";
-    display(padded(patches.at(100)));
+    //std::cout << "Patch 100 :\n";
+    //display(padded(patches.at(100)));
 
-    std::cout << "Texton 0 of patch 100 :\n";
-    std::vector<int> texton = patches_texton.at(100).at(0);
-    for (auto e : texton)
-        std::cout << " " << e;
-    std::cout << std::endl;
+    //std::cout << "Texton 0 of patch 100 :\n";
+    //std::vector<int> texton = patches_texton.at(100).at(0);
+    //for (auto e : texton)
+    //    std::cout << " " << e;
+    //std::cout << std::endl;
 
-    std::cout << "Histograms :\n";
-    std::ofstream out("test.csv");
-    for (auto& h : histograms) {
-        for (auto b : h)
-            out << b << ';';
-        out << '\n';
-    }
+    //std::cout << "Histograms :\n";
+    //std::ofstream out("test.csv");
+    //for (auto& h : histograms) {
+    //    for (auto b : h)
+    //        out << b << ';';
+    //    out << '\n';
+    //}
 
-    for (auto b : histograms[0])
-        std::cout << b << ';';
+    //for (auto b : histograms[0])
+    //    std::cout << b << ';';
 
 #endif
 

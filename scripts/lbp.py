@@ -8,21 +8,16 @@ patch_size = 16
 
 def extract_patches(img):
     h, w = img.shape[:2]
-
-    diff_x = patch_size - w % patch_size
-    val = int(diff_x / 2)
-    pad_x = (val, val) if (diff_x % 2 == 0) else (val, val + 1)
-
-    diff_y = patch_size - h % patch_size
-    val = int(diff_y / 2)
-    pad_y = (val, val) if (diff_y % 2 == 0) else (val, val + 1)
-
-    padded_img = cv2.copyMakeBorder(img, *pad_x, *pad_y, cv2.BORDER_CONSTANT, 0)
+    w = round(w, patch_size)
+    h = round(h, patch_size)
+    dim = (w, h)
+    resized = cv2.resize(img, dim, interpolation=cv2.INTER_CUBIC)
+    print(resized.shape)
 
     img_patches = []
-    for r in range(0, padded_img.shape[0] - patch_size, patch_size):
-        for c in range(0, padded_img.shape[1] - patch_size, patch_size):
-            patch = padded_img[r:r+patch_size, c:c+patch_size]
+    for r in range(0, resized.shape[0] - patch_size, patch_size):
+        for c in range(0, resized.shape[1] - patch_size, patch_size):
+            patch = resized[r:r+patch_size, c:c+patch_size]
             img_patches.append(patch)
     img_patches = np.array(img_patches)
 
@@ -30,7 +25,7 @@ def extract_patches(img):
 
 
 def extract_textons(patch):
-    
+
     def extract_elements(a):
         n = a.shape[0]
         r = np.minimum(np.arange(n)[::-1], np.arange(n))
@@ -43,15 +38,17 @@ def extract_textons(patch):
         for j in range(patch_size):
             cell = test_patch_pad[i:i+3,j:j+3]
             cell_center = cell[1][1]
+            #print(cell)
             compared_pixels = (extract_elements(cell) > cell_center).astype(int)
             textons.append(compared_pixels)
+
     return np.array(textons)
 
 
 def hist_from_texton(textons):
     hist = np.zeros(256)
     for i in textons:
-        val = int(''.join(list(map(str, i))), 2)  # Binary to Int
+        val = int(''.join(list(map(str, i))), 2)  # binary to Int
         hist[val] += 1
     return hist
 
@@ -62,15 +59,14 @@ def assign_clusters(descriptors):
     return pred, kmeans.cluster_centers_
 
 
+from skimage.feature import local_binary_pattern
 
 def main():
     img = cv2.imread("resources/beans.jpg", cv2.IMREAD_GRAYSCALE)
     patches = extract_patches(img)
-    p_textons = np.array([extract_textons(p) for p in patches[:10000]])
+
     descriptors = np.array([hist_from_texton(t) for t in p_textons])
     pred, centroids = assign_clusters(descriptors)
-    print(centroids.shape, centroids.dtype)
-    print(descriptors.shape)
     np.savetxt("resources/pred_sk.txt", pred, fmt="%u")
     np.savetxt("resources/centroids.txt", centroids, fmt="%.18f")
     np.savetxt("resources/centroids_t.txt", centroids.T, fmt="%.18f")

@@ -24,7 +24,7 @@ std::vector<uint8_t> extract_textons(const cv::Mat& patch);
 
 cv::Mat padded(const cv::Mat& patch);
 
-std::vector<std::vector<std::vector<int>>> 
+std::vector<std::vector<uint8_t>>
 textons_per_patch(const std::vector<cv::Mat>& patches);
 
 int binary_to_int(const std::vector<int>& t);

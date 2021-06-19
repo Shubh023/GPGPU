@@ -26,8 +26,8 @@ int main(int argc, char const *argv[]) {
     auto centroids = irgpu::load_descriptors("../resources/centroids.txt");
     //auto centroids_T = irgpu::load_descriptors_transpose("../resources/centroids_t.txt");
 
-    //auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
-    auto pred = irgpu::assign_centroids_grid(descriptors, centroids);
+    auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
+    //auto pred = irgpu::assign_centroids_grid(descriptors, centroids);
     //boost::timer::auto_cpu_timer t;
     //auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
     irgpu::save_pred(pred, "../resources/pred_cpp.txt");
