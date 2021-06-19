@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "nn2.hh"
+#include "nn_tiling.hh"
+
+#define DESC_DIM 256
 
 #define cudaCheckError() {                                                   \
     cudaError_t e=cudaGetLastError();                                        \
@@ -64,11 +66,9 @@ __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
 //}
 
 std::vector<int>
-assign_centroids2(const std::vector<histogram_t>& h_descriptors, 
-                  const std::vector<double>& h_centroids) {
+assign_centroids_tiling(const std::vector<histogram_t>& h_descriptors, 
+                        const std::vector<double>& h_centroids) {
 
-    std::cout << "Lancer\n";
-    std::cout << h_centroids.size() << "\n";
     int n_desc = h_descriptors.size();
     double *d_descriptors;
     cudaMalloc(&d_descriptors, n_desc * DESC_DIM * sizeof(double)); 
@@ -101,14 +101,13 @@ assign_centroids2(const std::vector<histogram_t>& h_descriptors,
     dim3 grid_dim((n_cent + block_dim.x - 1) / block_dim.x,
                   (n_desc + block_dim.y - 1) / block_dim.y);
     int patch_mem = block_dim.x*block_dim.y*sizeof(double);
-    std::cout << grid_dim.x << "\n"
-              << grid_dim.y << "\n"
-              << patch_mem << "\n";
+    std::cout << "Grid dim x : " << grid_dim.x << "\n"
+              << "Grid dim y : " << grid_dim.y << "\n"
+              << "Path memory (in B) : " << patch_mem / 8 << "\n";
 
     l2_sq<<<grid_dim, block_dim, 2 * patch_mem>>>(d_descriptors, d_centroids, 
                                                   d_l2_squared, n_desc, DESC_DIM,
                                                   n_cent);
-    cudaDeviceSynchronize();
     cudaCheckError();
 
     cudaMemcpy(&h_l2_squared[0], d_l2_squared, n_desc * n_cent * sizeof(double),

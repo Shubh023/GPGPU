@@ -1,6 +1,8 @@
 # Sequential lib
-set(SRC "nearest-neighbor/nn_seq.cpp"
-        "utils/io.cpp"
+set(SRC 
+    "lbp/lbp.cpp"
+    "nearest-neighbor/nn_seq.cpp"
+    "utils/io.cpp"
 )
 
 add_library(nn SHARED ${SRC})
@@ -11,8 +13,8 @@ target_include_directories(nn PUBLIC
 )
 
 # CUDA lib
-add_library(cuda_nn SHARED "nearest-neighbor/nn.cu"
-                           "nearest-neighbor/nn2.cu")
+add_library(cuda_nn SHARED "nearest-neighbor/nn_grid.cu"
+                           "nearest-neighbor/nn_tiling.cu")
                            
 target_compile_features(cuda_nn PUBLIC cxx_std_14)
 set_target_properties(cuda_nn PROPERTIES
@@ -26,5 +28,6 @@ set_property(TARGET app PROPERTY CUDA_ARCHITECTURES 75)
 target_link_libraries(app PUBLIC 
     "nn"
     "cuda_nn"
-    #${OpenCV_LIBS}
+    ${Boost_LIBRARIES}
+    ${OpenCV_LIBS}
 )

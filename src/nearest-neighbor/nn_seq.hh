@@ -10,6 +10,7 @@ namespace irgpu {
 
 /**
  * @brief Squared euclidean distance between two descriptors.
+ *        Sequential version.
  * 
  * @param desc1 First descriptor.
  * @param desc2 Second descriptor.
