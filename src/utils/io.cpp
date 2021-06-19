@@ -6,13 +6,13 @@
 
 namespace irgpu {
 
-std::vector<histogram_t> load_descriptors(std::string filename) {
+std::vector<histogram64_t> load_centroids(std::string filename) {
 
     std::ifstream input(filename);
-    std::vector<histogram_t> descriptors;
+    std::vector<histogram64_t> centroids;
 
     for(std::string line; std::getline(input, line); ) {
-        histogram_t desc{0};
+        histogram64_t desc{0};
         std::stringstream in(line);
 
         double val;
@@ -22,27 +22,27 @@ std::vector<histogram_t> load_descriptors(std::string filename) {
             i++;
         }
 
-        descriptors.push_back(desc);
+        centroids.push_back(desc);
     }
 
-    return descriptors;
+    return centroids;
 }
 
-std::vector<double> load_descriptors_transpose(std::string filename) {
+std::vector<double> load_centroids_transpose(std::string filename) {
 
     std::ifstream input(filename);
-    std::vector<double> descriptors_T;
+    std::vector<double> centroids_T;
 
     for(std::string line; std::getline(input, line); ) {
         std::stringstream in(line);
 
         double val;
         while (in >> val) {
-            descriptors_T.push_back(val);
+            centroids_T.push_back(val);
         }
     }
 
-    return descriptors_T;
+    return centroids_T;
 }
 
 void save_pred(const std::vector<int>& pred, std::string filename) {

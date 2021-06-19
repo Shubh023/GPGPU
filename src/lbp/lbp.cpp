@@ -125,23 +125,23 @@ textons_per_patch(const std::vector<cv::Mat>& patches) {
     return patches_textons;
 }
 
-histogram_t extract_hist(const std::vector<uint8_t>& textons) {
-    histogram_t hist{0};
+histogram8_t extract_hist(const std::vector<uint8_t>& textons) {
+    histogram8_t hist{0};
     for (uint8_t t : textons) {
         hist[t] += 1;
     }
     return hist;
 }
 
-std::vector<histogram_t>
+std::vector<histogram8_t>
 get_histograms(const std::vector<std::vector<uint8_t>>& patches_textons) {
-    std::vector<histogram_t> histograms;
+    std::vector<histogram8_t> histograms;
     for (const auto& textons : patches_textons)
         histograms.push_back(extract_hist(textons));
     return histograms;
 }
 
-std::vector<histogram_t> lbp_seq(const cv::Mat& img) {
+std::vector<histogram8_t> lbp_seq(const cv::Mat& img) {
 
     std::string ty =  type2str(img.type());
     printf("Matrix: %s %dx%d \n", ty.c_str(), img.cols, img.rows);
@@ -165,7 +165,7 @@ std::vector<histogram_t> lbp_seq(const cv::Mat& img) {
                 << patches_texton[0].size() << ")" << std::endl;
 
     // Compute textons histograms for each patch 
-    std::vector<histogram_t> histograms = get_histograms(patches_texton);
+    std::vector<histogram8_t> histograms = get_histograms(patches_texton);
     std::cout << "histograms shape : ("
                 << histograms.size() << ","
                 << histograms[0].size() << ")" << std::endl;

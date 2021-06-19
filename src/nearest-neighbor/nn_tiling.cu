@@ -17,14 +17,14 @@
 namespace irgpu {
 
 
-__global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
+__global__ void l2_sq(uint8_t *mat1, double *mat2, double *l2_sq,
                       int M, int N, int P) {
 
     int tile_width = blockDim.x;  // square tile
 
     // Need to split the shared buffer to use two.
-    extern __shared__ double tiles[];
-    double *tile1 = (double*) tiles;
+    extern __shared__ uint8_t tiles[];
+    uint8_t *tile1 = tiles;
     double *tile2 = (double*) &tiles[tile_width * tile_width];
 
     int bx = blockIdx.x;
@@ -66,12 +66,12 @@ __global__ void l2_sq(double *mat1, double *mat2, double *l2_sq,
 //}
 
 std::vector<int>
-assign_centroids_tiling(const std::vector<histogram_t>& h_descriptors, 
+assign_centroids_tiling(const std::vector<histogram8_t>& h_descriptors, 
                         const std::vector<double>& h_centroids) {
 
     int n_desc = h_descriptors.size();
-    double *d_descriptors;
-    cudaMalloc(&d_descriptors, n_desc * DESC_DIM * sizeof(double)); 
+    uint8_t *d_descriptors;
+    cudaMalloc(&d_descriptors, n_desc * DESC_DIM * sizeof(uint8_t)); 
     cudaCheckError();
 
     int n_cent = h_centroids.size() / 256;
@@ -89,25 +89,28 @@ assign_centroids_tiling(const std::vector<histogram_t>& h_descriptors,
     //cudaMalloc(&d_assignments, n_desc * sizeof(int)); 
     //cudaCheckError();
 
-    cudaMemcpy(d_descriptors, &h_descriptors[0], n_desc * DESC_DIM * sizeof(double),
+    cudaMemcpy(d_descriptors, &h_descriptors[0], n_desc * DESC_DIM * sizeof(uint8_t),
                cudaMemcpyHostToDevice);
     cudaMemcpy(d_centroids, &h_centroids[0], n_cent * DESC_DIM * sizeof(double),
                cudaMemcpyHostToDevice);
     cudaCheckError();
 
     // need to adjust because of shared memory usage -> SM
-    //dim3 block_dim(32, 32);
     dim3 block_dim(32, 32);
     dim3 grid_dim((n_cent + block_dim.x - 1) / block_dim.x,
                   (n_desc + block_dim.y - 1) / block_dim.y);
-    int patch_mem = block_dim.x*block_dim.y*sizeof(double);
+
+    // Space needed in shared memory
+    int patch_mem = block_dim.x*block_dim.y*sizeof(uint8_t) 
+                  + block_dim.x*block_dim.y*sizeof(double);
+
     std::cout << "Grid dim x : " << grid_dim.x << "\n"
               << "Grid dim y : " << grid_dim.y << "\n"
-              << "Path memory (in B) : " << patch_mem / 8 << "\n";
+              << "Patch shared memory (in B) : " << patch_mem / 8 << "\n";
 
-    l2_sq<<<grid_dim, block_dim, 2 * patch_mem>>>(d_descriptors, d_centroids, 
-                                                  d_l2_squared, n_desc, DESC_DIM,
-                                                  n_cent);
+    l2_sq<<<grid_dim, block_dim, patch_mem>>>(d_descriptors, d_centroids, 
+                                              d_l2_squared, n_desc, DESC_DIM,
+                                              n_cent);
     cudaCheckError();
 
     cudaMemcpy(&h_l2_squared[0], d_l2_squared, n_desc * n_cent * sizeof(double),

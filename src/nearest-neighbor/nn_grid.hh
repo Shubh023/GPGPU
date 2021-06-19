@@ -16,7 +16,7 @@ namespace irgpu {
  * @return std::vector<int> Vector of centroid indexes.
  */
 std::vector<int>
-assign_centroids_grid(const std::vector<histogram_t>& descriptors, 
-                      const std::vector<histogram_t>& centroids);
+assign_centroids_grid(const std::vector<histogram8_t>& descriptors, 
+                      const std::vector<histogram64_t>& centroids);
 
 }

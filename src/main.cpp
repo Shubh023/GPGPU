@@ -20,15 +20,13 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    std::vector<irgpu::histogram_t> descriptors = irgpu::lbp_seq(img);
+    std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_seq(img);
     
-    //auto descriptors = irgpu::load_descriptors("../resources/desc.txt");
-    auto centroids = irgpu::load_descriptors("../resources/centroids.txt");
-    //auto centroids_T = irgpu::load_descriptors_transpose("../resources/centroids_t.txt");
+    //auto centroids = irgpu::load_centroids("../resources/centroids.txt");
+    auto centroids_T = irgpu::load_centroids_transpose("../resources/centroids_t.txt");
 
-    auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
+    //auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
     //auto pred = irgpu::assign_centroids_grid(descriptors, centroids);
-    //boost::timer::auto_cpu_timer t;
-    //auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
+    auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
     irgpu::save_pred(pred, "../resources/pred_cpp.txt");
 }

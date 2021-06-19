@@ -5,7 +5,8 @@
 
 namespace irgpu {
 
-using histogram_t = std::array<uint8_t, 256>;
+using histogram8_t = std::array<uint8_t, 256>;
+using histogram64_t = std::array<double, 256>;
 
 
 int round(int x, int p);
@@ -29,12 +30,12 @@ textons_per_patch(const std::vector<cv::Mat>& patches);
 
 int binary_to_int(const std::vector<int>& t);
 
-histogram_t extract_hist(const std::vector<std::vector<int>>& texton);
+histogram8_t extract_hist(const std::vector<std::vector<int>>& texton);
 
-std::vector<histogram_t>
+std::vector<histogram8_t>
 get_histograms(const std::vector<std::vector<std::vector<int>>>& patches_textons);
 
-std::vector<histogram_t> lbp_seq(const cv::Mat& img);
+std::vector<histogram8_t> lbp_seq(const cv::Mat& img);
 
 }
 

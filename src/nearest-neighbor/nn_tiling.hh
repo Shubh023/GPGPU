@@ -16,7 +16,7 @@ namespace irgpu {
  * @return std::vector<int> Vector of centroid indexes.
  */
 std::vector<int>
-assign_centroids_tiling(const std::vector<histogram_t>& descriptors, 
+assign_centroids_tiling(const std::vector<histogram8_t>& descriptors, 
                         const std::vector<double>& centroids_T);
 
 }

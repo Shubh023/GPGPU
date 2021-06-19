@@ -18,16 +18,16 @@
 
 namespace irgpu {
 
-__device__ double squared_L2_distance(double* desc1, double* desc2) {
+__device__ double squared_L2_distance(uint8_t *desc, double *cent) {
     double res = 0;
     for (int i = 0; i < DESC_DIM; i++) {
-        double diff = desc1[i] - desc2[i];
+        double diff = (double)desc[i] - cent[i];
         res += diff * diff;
     }
     return res;
 }
 
-__global__ void nearest_centroid(double *descriptors, double *centroids, 
+__global__ void nearest_centroid(uint8_t *descriptors, double *centroids, 
                                  int *assignments, int n_desc, int n_cent) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     if (index >= n_desc)
@@ -50,17 +50,17 @@ __global__ void nearest_centroid(double *descriptors, double *centroids,
 }
 
 std::vector<int>
-assign_centroids_grid(const std::vector<histogram_t>& h_descriptors, 
-                      const std::vector<histogram_t>& h_centroids) {
+assign_centroids_grid(const std::vector<histogram8_t>& h_descriptors, 
+                      const std::vector<histogram64_t>& h_centroids) {
 
     int n_desc = h_descriptors.size();
-    double *d_descriptors;
-    cudaMalloc(&d_descriptors, n_desc * DESC_DIM * sizeof(double)); 
+    uint8_t *d_descriptors;
+    cudaMalloc(&d_descriptors, n_desc * DESC_DIM * sizeof(uint8_t)); 
     cudaCheckError();
 
     int n_cent = h_centroids.size();
     double *d_centroids;
-    cudaMalloc(&d_centroids, n_cent * DESC_DIM* sizeof(double)); 
+    cudaMalloc(&d_centroids, n_cent * DESC_DIM * sizeof(double)); 
     cudaCheckError();
 
     auto h_assignments = std::vector<int>(n_desc);
@@ -68,7 +68,7 @@ assign_centroids_grid(const std::vector<histogram_t>& h_descriptors,
     cudaMalloc(&d_assignments, n_desc * sizeof(int)); 
     cudaCheckError();
 
-    cudaMemcpy(d_descriptors, &h_descriptors[0], n_desc * DESC_DIM * sizeof(double),
+    cudaMemcpy(d_descriptors, &h_descriptors[0], n_desc * DESC_DIM * sizeof(uint8_t),
                cudaMemcpyHostToDevice);
     cudaMemcpy(d_centroids, &h_centroids[0], n_cent * DESC_DIM * sizeof(double),
                cudaMemcpyHostToDevice);
@@ -78,10 +78,8 @@ assign_centroids_grid(const std::vector<histogram_t>& h_descriptors,
     int grid_dim = (n_desc + block_dim - 1) / block_dim;
     std::cout << "Grid dim : " << grid_dim << "\n"
               << "Block dim : " << block_dim << "\n";
-    nearest_centroid<<<grid_dim, block_dim>>>(d_descriptors,
-                                                             d_centroids,
-                                                             d_assignments,
-                                                             n_desc, n_cent);
+    nearest_centroid<<<grid_dim, block_dim>>>(d_descriptors, d_centroids,
+                                              d_assignments, n_desc, n_cent);
     cudaDeviceSynchronize();
     cudaCheckError();
 
