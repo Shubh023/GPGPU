@@ -21,4 +21,11 @@ std::vector<int> predict_centroids_gpu1(const cv::Mat& img) {
     return pred;
 }
 
+std::vector<int> predict_centroids_gpu2(const cv::Mat& img) {
+    std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_seq(img);
+    auto centroids_T = irgpu::load_centroids_transpose("../resources/centroids_t.txt");
+    auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
+    return pred;
+}
+
 }

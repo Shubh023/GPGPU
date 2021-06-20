@@ -1,4 +1,6 @@
 # Build directory
+.vscode/
+resources/*.txt
 build/
 env/
 

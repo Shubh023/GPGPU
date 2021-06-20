@@ -29,11 +29,26 @@ void BM_PredictCentroids_GPU1(benchmark::State& st) {
                                                    benchmark::Counter::kIsRate);
 }
 
+void BM_PredictCentroids_GPU2(benchmark::State& st) {
+
+    cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
+
+    for (auto _ : st)
+        irgpu::predict_centroids_gpu2(img);
+
+    st.counters["frame_rate"] = benchmark::Counter(st.iterations(),
+                                                   benchmark::Counter::kIsRate);
+}
+
 BENCHMARK(BM_PredictCentroids_CPU)
 ->Unit(benchmark::kMillisecond)
 ->UseRealTime();
 
 BENCHMARK(BM_PredictCentroids_GPU1)
+->Unit(benchmark::kMillisecond)
+->UseRealTime();
+
+BENCHMARK(BM_PredictCentroids_GPU2)
 ->Unit(benchmark::kMillisecond)
 ->UseRealTime();
 
