@@ -21,7 +21,7 @@
 
 int main(int argc, char const *argv[]) {
 
-    std::string image_path = "../../resources/beans.jpg";
+    std::string image_path = "../../resources/1.jpg";
 
     cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
     if (img.empty()) {
@@ -46,7 +46,7 @@ int main(int argc, char const *argv[]) {
     for (int r = 0; r < img.rows - PW; r += PW) {
         for (int c = 0; c < img.cols - PH; c += PH) {
             cv::Mat colorful = cv::Mat(PH, PW, CV_8UC1, pred[index]);
-            cv::Mat dst_roi = reconstructed_image(cv::Rect(c, w, PH, PW));
+            cv::Mat dst_roi = reconstructed_image(cv::Rect(c, r, PH, PW));
             colorful.copyTo(dst_roi);
             index += 1;
         }
