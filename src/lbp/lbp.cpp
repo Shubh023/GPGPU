@@ -48,8 +48,8 @@ std::vector<cv::Mat> get_patches(const cv::Mat& img) {
     std::vector<cv::Mat> patches;
     cv::Mat patch;
 
-    for (int j = 0; j < img.rows - PH; j += PH) {
-        for (int i = 0; i < img.cols - PW; i += PW) {
+    for (int j = 0; j < img.rows; j += PH) {
+        for (int i = 0; i < img.cols; i += PW) {
             patch = img(cv::Rect(i, j, PH, PW));
             patches.push_back(patch);
         }
