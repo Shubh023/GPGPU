@@ -21,42 +21,106 @@
 
 int main(int argc, char const *argv[]) {
 
-    std::string image_path = "../../resources/1.jpg";
+    int mode = 1;
+    if (mode == 1)
+    {
+        std::string video_path = "../../resources/1_1080p60.MOV";
+        cv::VideoCapture video_cap(video_path);
+	    if(!video_cap.isOpened()){
+	        std::cout << "Error opening video stream or file" << std::endl;
+	        return -1;
+	    }
+	    while(1){
+	        cv::Mat frame;
+	        video_cap >> frame;
+	        if (frame.empty())
+	            break;
+            ////////////////////
 
-    cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
-    if (img.empty()) {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return 1;
+            
+            cv::Mat resized = irgpu::resize_image(frame);
+            cv::Mat grayscale;
+            cv::cvtColor(resized, grayscale, cv::COLOR_BGR2GRAY);
+            std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_cuda(grayscale);
+
+            auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids_t.txt");
+            auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
+
+            irgpu::save_pred(pred, "../../resources/pred_cpp.txt");
+
+
+            int index = 0;    
+            cv::Mat reconstructed_image = grayscale.clone();
+            for (int r = 0; r < grayscale.rows; r += PW) {
+                for (int c = 0; c < grayscale.cols; c += PH) {
+                    cv::Mat colorful = cv::Mat(PH, PW, CV_8UC1, pred.at(index));
+                    cv::Mat dst_roi = reconstructed_image(cv::Rect(c, r, PH, PW));
+                    colorful.copyTo(dst_roi);
+                    index += 1;
+                }
+            }
+
+            cv::Mat img_color;
+            cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
+            cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_HSV);
+            // cv::imshow("window", img_color);
+            
+            int scale = 0.8;
+            int window_width = int(img_color.cols * scale);
+            int window_height = int(img_color.rows * scale);
+            cv::namedWindow("ROI Barcode", cv::WINDOW_NORMAL);
+            cv::resizeWindow("ROI Barcode", window_height, window_width);
+            cv::imshow("ROI Barcode", img_color);
+            cv::namedWindow("Video", cv::WINDOW_NORMAL);
+            cv::resizeWindow("Video", window_width, window_height);
+            cv::imshow("Video", frame);
+
+	        char c = (char)cv::waitKey(25);
+	        if(c == 27)
+	            break;
+	    }
+	    video_cap.release();
+        cv::destroyAllWindows();
     }
+    if (mode == 2) {
 
-    std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_cuda(img);
-    
-    //auto centroids = irgpu::load_centroids("../resources/centroids.txt");
-    //auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
-    //auto pred = irgpu::assign_centroids_grid(descriptors, centroids);
+        std::string image_path = "../../resources/1.jpg";
 
-    auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids_t.txt");
-    auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
-
-    irgpu::save_pred(pred, "../resources/pred_cpp.txt");
-    std::cout << pred.size() << std::endl;
-
-    int index = 0;    
-    cv::Mat reconstructed_image = img.clone();
-    for (int r = 0; r < img.rows - PW; r += PW) {
-        for (int c = 0; c < img.cols - PH; c += PH) {
-            cv::Mat colorful = cv::Mat(PH, PW, CV_8UC1, pred[index]);
-            cv::Mat dst_roi = reconstructed_image(cv::Rect(c, r, PH, PW));
-            colorful.copyTo(dst_roi);
-            index += 1;
+        cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
+        if (img.empty()) {
+            std::cout << "Could not read the image: " << image_path << std::endl;
+            return 1;
         }
-    }
 
-    cv::Mat img_color;
-    cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_JET);
-    cv::imshow("Reconstructed", img_color);
-    cv::imshow("Original", img);
-    cv::waitKey(0);
-    cv::destroyAllWindows();
+        cv::Mat image = irgpu::resize_image(img);
+
+        std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_cuda(image);
+ 
+        auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids_t.txt");
+        auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
+
+        irgpu::save_pred(pred, "../../resources/pred_cpp.txt");
+
+        int index = 0;    
+        cv::Mat reconstructed_image = image.clone();
+        for (int r = 0; r < image.rows; r += PW) {
+            for (int c = 0; c < image.cols; c += PH) {
+                // std::cout << pred.at(index) << " at " << index << std::endl;
+                cv::Mat colorful = cv::Mat(PH, PW, CV_8UC1, pred.at(index));
+                cv::Mat dst_roi = reconstructed_image(cv::Rect(c, r, PH, PW));
+                colorful.copyTo(dst_roi);
+                index += 1;
+            }
+        }
+        
+        cv::Mat img_color;
+        cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
+        cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_HSV);
+        cv::imshow("Reconstructed", img_color);
+        cv::imshow("Original", image);
+        cv::waitKey(0);
+        cv::destroyAllWindows();
+    }
+    
     return 0;
 }
