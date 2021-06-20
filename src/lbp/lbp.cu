@@ -167,7 +167,7 @@ void get_lbp(unsigned char *in, const int w, const int h, int* d_histograms, siz
     checkCudaErrors(cudaFree(in_gpu));
 }
 
-std::vector<histogram8_t> lbp_seq(const cv::Mat& image)
+std::vector<histogram8_t> lbp_cuda(const cv::Mat& image)
 {
     int w = image.cols;
     int h = image.rows;

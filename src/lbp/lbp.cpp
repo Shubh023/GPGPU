@@ -11,9 +11,6 @@
 
 namespace irgpu {
 
-int round(int x, int p) {
-    return x - (x % p);
-}
 
 void display(const cv::Mat& mat) {
     for (int i = 0; i < mat.rows; i++) {

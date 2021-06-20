@@ -98,7 +98,7 @@ assign_centroids_tiling(const std::vector<histogram8_t>& h_descriptors,
     cudaCheckError();
 
     // need to adjust because of shared memory usage -> SM
-    dim3 block_dim(1, 1);
+    dim3 block_dim(16, 16);
     dim3 grid_dim((n_cent + block_dim.x - 1) / block_dim.x,
                   (n_desc + block_dim.y - 1) / block_dim.y);
 
@@ -115,6 +115,7 @@ assign_centroids_tiling(const std::vector<histogram8_t>& h_descriptors,
     l2_sq<<<grid_dim, block_dim, patch_mem>>>(d_descriptors, d_centroids, 
                                               d_l2_squared, n_desc, DESC_DIM,
                                               n_cent);
+    cudaDeviceSynchronize();
     cudaCheckError();
 
     cudaMemcpy(&h_l2_squared[0], d_l2_squared, n_desc * n_cent * sizeof(double),

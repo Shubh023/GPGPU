@@ -24,6 +24,6 @@ namespace irgpu {
 
     cv::Mat resize_image(cv::Mat img);
 
-    std::vector<histogram8_t> lbp_seq(const cv::Mat& image);
+    std::vector<histogram8_t> lbp_cuda(const cv::Mat& image);
 }
 

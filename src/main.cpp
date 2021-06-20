@@ -2,7 +2,6 @@
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 #include <string>
-
 #include "nearest-neighbor/nn_seq.hh"
 #include "nearest-neighbor/nn_grid.hh"
 #include "nearest-neighbor/nn_tiling.hh"
@@ -11,7 +10,7 @@
 
 int main(int argc, char const *argv[]) {
 
-    std::string image_path = "../resources/beans.jpg";
+    std::string image_path = "../../resources/1s.jpg";
 
     cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
     if (img.empty()) {
@@ -19,13 +18,13 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_seq(img);
+    std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_cuda(img);
     
     //auto centroids = irgpu::load_centroids("../resources/centroids.txt");
     //auto pred = irgpu::assign_centroids_seq(descriptors, centroids);
     //auto pred = irgpu::assign_centroids_grid(descriptors, centroids);
 
-    auto centroids_T = irgpu::load_centroids_transpose("../resources/centroids_t.txt");
+    auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids_t.txt");
     auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
 
     irgpu::save_pred(pred, "../resources/pred_cpp.txt");
