@@ -1,6 +1,5 @@
 # Sequential lib
 set(SRC 
-    "lbp/lbp.cpp"
     "nearest-neighbor/nn_seq.cpp"
     "utils/io.cpp"
     "pred.cpp"
@@ -16,7 +15,8 @@ target_include_directories(nn PUBLIC
 
 # CUDA lib
 add_library(cuda_nn SHARED "nearest-neighbor/nn_grid.cu"
-                           "nearest-neighbor/nn_tiling.cu")
+                           "nearest-neighbor/nn_tiling.cu"
+                           "lbp/lbp.cu")
                            
 target_compile_features(cuda_nn PUBLIC cxx_std_14)
 set_target_properties(cuda_nn PROPERTIES
