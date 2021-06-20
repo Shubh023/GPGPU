@@ -2,7 +2,6 @@
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 #include <string>
-#include <benchmark/benchmark.h>
 
 #include "nearest-neighbor/nn_seq.hh"
 #include "nearest-neighbor/nn_grid.hh"

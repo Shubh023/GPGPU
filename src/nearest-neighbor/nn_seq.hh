@@ -25,8 +25,8 @@ static double squared_L2_distance(const histogram8_t& desc1,
  * @param centroids Vector of centroids. 
  * @return int Index of the centroid assigned.
  */
-static int nearest_centroid(histogram8_t desc,
-                            const std::vector<histogram8_t>& centroids);
+static int nearest_centroid(const histogram8_t& desc,
+                            const std::vector<histogram64_t>& centroids);
 
 /**
  * @brief Assign a centroid to every descriptor in a list.
@@ -37,6 +37,6 @@ static int nearest_centroid(histogram8_t desc,
  */
 std::vector<int>
 assign_centroids_seq(const std::vector<histogram8_t>& descriptors, 
-                     const std::vector<histogram8_t>& centroids);
+                     const std::vector<histogram64_t>& centroids);
 
 }

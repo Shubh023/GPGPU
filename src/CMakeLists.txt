@@ -3,10 +3,12 @@ set(SRC
     "lbp/lbp.cpp"
     "nearest-neighbor/nn_seq.cpp"
     "utils/io.cpp"
+    "pred.cpp"
 )
 
 add_library(nn SHARED ${SRC})
 target_include_directories(nn PUBLIC
+    "."
     "lbp"
     "nearest-neighbor"
     "utils"    
@@ -26,6 +28,16 @@ add_executable(app main.cpp)
 set_property(TARGET app PROPERTY CUDA_ARCHITECTURES 75)
 
 target_link_libraries(app PUBLIC 
+    "nn"
+    "cuda_nn"
+    ${Boost_LIBRARIES}
+    ${OpenCV_LIBS}
+)
+
+add_executable(bench bench.cpp)
+set_property(TARGET bench PROPERTY CUDA_ARCHITECTURES 75)
+
+target_link_libraries(bench PUBLIC 
     "nn"
     "cuda_nn"
     ${Boost_LIBRARIES}
