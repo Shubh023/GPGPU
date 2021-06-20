@@ -1,4 +1,3 @@
-#include <boost/timer/timer.hpp>
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 
@@ -15,28 +14,35 @@
 #include "nearest-neighbor/nn_grid.hh"
 #include "nearest-neighbor/nn_tiling.hh"
 #include "utils/io.hh"
+#include <cstdlib>
 
 #define PH 16
 #define PW 16
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
 
-    int mode = 1;
+    int mode = 0;
+
+    if (argc > 1)
+        mode = atoi(argv[1]);
     if (mode == 1)
     {
         std::string video_path = "../../resources/1_1080p60.MOV";
+        if (argc > 2)
+            video_path = argv[2];
         cv::VideoCapture video_cap(video_path);
 	    if(!video_cap.isOpened()){
 	        std::cout << "Error opening video stream or file" << std::endl;
 	        return -1;
 	    }
-	    while(1){
+        double fps = video_cap.get(cv::CAP_PROP_FPS);
+        double total_frames = video_cap.get(cv::CAP_PROP_FRAME_COUNT);
+	    while(1) {
+
 	        cv::Mat frame;
 	        video_cap >> frame;
 	        if (frame.empty())
 	            break;
-            ////////////////////
-
             
             cv::Mat resized = irgpu::resize_image(frame);
             cv::Mat grayscale;
@@ -48,7 +54,6 @@ int main(int argc, char const *argv[]) {
 
             irgpu::save_pred(pred, "../../resources/pred_cpp.txt");
 
-
             int index = 0;    
             cv::Mat reconstructed_image = grayscale.clone();
             for (int r = 0; r < grayscale.rows; r += PW) {
@@ -59,7 +64,7 @@ int main(int argc, char const *argv[]) {
                     index += 1;
                 }
             }
-
+        
             cv::Mat img_color;
             cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
             cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_HSV);
@@ -74,7 +79,7 @@ int main(int argc, char const *argv[]) {
             cv::namedWindow("Video", cv::WINDOW_NORMAL);
             cv::resizeWindow("Video", window_width, window_height);
             cv::imshow("Video", frame);
-
+            
 	        char c = (char)cv::waitKey(25);
 	        if(c == 27)
 	            break;
@@ -83,9 +88,9 @@ int main(int argc, char const *argv[]) {
         cv::destroyAllWindows();
     }
     if (mode == 2) {
-
         std::string image_path = "../../resources/1.jpg";
-
+        if (argc > 2)
+            image_path = argv[2];
         cv::Mat img = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
         if (img.empty()) {
             std::cout << "Could not read the image: " << image_path << std::endl;
