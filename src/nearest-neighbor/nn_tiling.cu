@@ -5,6 +5,8 @@
 
 #define DESC_DIM 256
 
+//#define DEBUG     // comment to disable 
+
 #define cudaCheckError() {                                                   \
     cudaError_t e=cudaGetLastError();                                        \
     if(e!=cudaSuccess) {                                                     \
@@ -14,8 +16,8 @@
     }                                                                        \
 }
 
-namespace irgpu {
 
+namespace irgpu {
 
 __global__ void l2_sq(uint8_t *mat1, double *mat2, double *l2_sq,
                       int M, int N, int P) {
@@ -104,9 +106,11 @@ assign_centroids_tiling(const std::vector<histogram8_t>& h_descriptors,
     int patch_mem = block_dim.x*block_dim.y*sizeof(uint8_t) 
                   + block_dim.x*block_dim.y*sizeof(double);
 
+#ifdef DEBUG
     std::cout << "Grid dim x : " << grid_dim.x << "\n"
               << "Grid dim y : " << grid_dim.y << "\n"
               << "Patch shared memory (in B) : " << patch_mem / 8 << "\n";
+#endif
 
     l2_sq<<<grid_dim, block_dim, patch_mem>>>(d_descriptors, d_centroids, 
                                               d_l2_squared, n_desc, DESC_DIM,

@@ -3,6 +3,9 @@
 #include "nn_seq.hh"
 #include "lbp.hh"
 
+//#define DEBUG     // comment to disable 
+
+
 namespace irgpu {
 
 double squared_L2_distance(const histogram8_t& desc, const histogram64_t& cent) {

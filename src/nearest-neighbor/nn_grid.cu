@@ -5,6 +5,8 @@
 
 #define DESC_DIM 256
 
+//#define DEBUG     // comment to disable 
+
 #define cudaCheckError() {                                                   \
     cudaError_t e=cudaGetLastError();                                        \
     if(e!=cudaSuccess) {                                                     \
@@ -13,7 +15,6 @@
         exit(EXIT_FAILURE);                                                  \
     }                                                                        \
 }
-
 
 
 namespace irgpu {
@@ -76,8 +77,12 @@ assign_centroids_grid(const std::vector<histogram8_t>& h_descriptors,
 
     int block_dim = 1024;
     int grid_dim = (n_desc + block_dim - 1) / block_dim;
+
+#ifdef DEBUG
     std::cout << "Grid dim : " << grid_dim << "\n"
               << "Block dim : " << block_dim << "\n";
+#endif
+
     nearest_centroid<<<grid_dim, block_dim>>>(d_descriptors, d_centroids,
                                               d_assignments, n_desc, n_cent);
     cudaDeviceSynchronize();

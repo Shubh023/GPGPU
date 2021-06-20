@@ -6,9 +6,7 @@
 #define PH 16
 #define PW 16
 
-#ifndef DEBUG 
-#  define DEBUG 1 // set debug mode
-#endif
+//#define DEBUG     // comment to disable 
 
 
 namespace irgpu {
@@ -135,31 +133,41 @@ get_histograms(const std::vector<std::vector<uint8_t>>& patches_textons) {
 std::vector<histogram8_t> lbp_seq(const cv::Mat& img) {
 
     std::string ty =  type2str(img.type());
+#ifdef DEBUG
     printf("Matrix: %s %dx%d \n", ty.c_str(), img.cols, img.rows);
+#endif
 
     // Resize image
     int width = round(img.cols, PW);
     int height = round(img.rows, PH);
     cv::Mat resized;
     cv::resize(img, resized, cv::Size(width, height), 0, 0, cv::INTER_CUBIC);
+#ifdef DEBUG
     std::cout << "cols: " << img.cols << "\nrows: " << img.rows << std::endl;
     std::cout << "\ncols: " << resized.cols << "\nrows: " << resized.rows << std::endl;
+#endif
 
     // Get all patches
     std::vector<cv::Mat> patches = get_patches(resized);
+#ifdef DEBUG
     std::cout << "Patches Extracted : " <<  patches.size() << std::endl;
+#endif
 
     // Compute 256 textons of each patches
     std::vector<std::vector<uint8_t>> patches_texton = textons_per_patch(patches);
+#ifdef DEBUG
     std::cout << "patches_texton shape : ("
                 << patches_texton.size() << ","
                 << patches_texton[0].size() << ")" << std::endl;
+#endif
 
     // Compute textons histograms for each patch 
     std::vector<histogram8_t> histograms = get_histograms(patches_texton);
+#ifdef DEBUG
     std::cout << "histograms shape : ("
                 << histograms.size() << ","
                 << histograms[0].size() << ")" << std::endl;
+#endif
 
 #ifdef DEBUG
     for (const auto& h : histograms) {
