@@ -59,8 +59,6 @@ def assign_clusters(descriptors):
     return pred, kmeans.cluster_centers_
 
 
-from skimage.feature import local_binary_pattern
-
 def main():
     img = cv2.imread("resources/beans.jpg", cv2.IMREAD_GRAYSCALE)
     patches = extract_patches(img)
