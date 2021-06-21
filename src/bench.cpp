@@ -5,7 +5,7 @@
 #include "pred.hh"
 
 constexpr int niteration = 1000;
-const std::string image_path = "../../resources/1.jpg";
+const std::string image_path = "../../resources/beans.jpg";
 
 
 void BM_PredictCentroids_CPU(benchmark::State& st) {
