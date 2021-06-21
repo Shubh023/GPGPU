@@ -18,6 +18,7 @@
 #include <time.h>
 #include <chrono>
 
+
 #define PH 16
 #define PW 16
 
@@ -71,23 +72,7 @@ int main(int argc, char *argv[]) {
                     index += 1;
                 }
             }
-
-            cv::Mat img_color;
-            cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
-            cv::applyColorMap(img_color, img_color, cv::COLORMAP_JET);
-            std::string label = "FPS: ";
-            //std::string fps_str = std::string(int(fps));
-            //label.append(fps_str);
-            // cv::putText(frame, label, cv::Point(10, 5), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-            int scale = 0.8;
-            int window_width = int(img_color.cols * scale);
-            int window_height = int(img_color.rows * scale);
-            cv::namedWindow("ROI Barcode", cv::WINDOW_NORMAL);
-            cv::resizeWindow("ROI Barcode", window_height, window_width);
-            cv::imshow("ROI Barcode", img_color);
-            cv::namedWindow("Video", cv::WINDOW_NORMAL);
-            cv::resizeWindow("Video", window_width, window_height);
-            cv::imshow("Video", frame);
+                          
             auto end = std::chrono::steady_clock::now();
             double seconds = double(1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
             frame_ct++;
@@ -101,9 +86,30 @@ int main(int argc, char *argv[]) {
             std::cout << "Time taken : " << seconds << " seconds" << std::endl;
             std::cout << "Estimated FPS : " << fps << ", counter : " << frame_ct << std::endl;
 
+           
+
+            cv::Mat img_color;
+            cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
+            cv::applyColorMap(img_color, img_color, cv::COLORMAP_JET);
+            std::string label = "FPS: ";
+            //std::string fps_str = std::string(int(fps));
+            //label.append(fps_str);
+            // cv::putText(frame, label, cv::Point(10, 5), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+            int scale = 0.95;
+            int window_width = int(img_color.cols * scale);
+            int window_height = int(img_color.rows * scale);
+            cv::namedWindow("ROI Barcode", cv::WINDOW_NORMAL);
+            cv::resizeWindow("ROI Barcode", window_width, window_height);
+            cv::moveWindow("ROI Barcode", 130, 600);
+            cv::imshow("ROI Barcode", img_color);
+            cv::namedWindow("Video", cv::WINDOW_NORMAL);
+            cv::resizeWindow("Video", window_width, window_height);
+            cv::moveWindow("Video", 450, 600);
+            cv::imshow("Video", frame);
+          
 	        char c = (char)cv::waitKey(25);
 	        if(c == 27)
-	            break;
+	            break;            
 	    }
 	    video_cap.release();
         cv::destroyAllWindows();
@@ -142,15 +148,17 @@ int main(int argc, char *argv[]) {
         cv::Mat img_color;
         cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
         cv::applyColorMap(img_color, img_color, cv::COLORMAP_JET);
-        int scale = 0.8;
+        int scale = 0.9;
         int window_width = int(img_color.cols * scale);
         int window_height = int(img_color.rows * scale);
         cv::namedWindow("Reconstructed", cv::WINDOW_NORMAL);
-        cv::resizeWindow("Reconstructed", window_height, window_width);
+        cv::resizeWindow("Reconstructed",window_width, window_height);
         cv::imshow("Reconstructed", img_color);
+        // cv::moveWindow("Reconstructed",0,0);
         cv::namedWindow("Original", cv::WINDOW_NORMAL);
-        cv::resizeWindow("Original", window_height, window_width);
+        cv::resizeWindow("Original", window_width, window_height);
         cv::imshow("Original", image);
+        // cv::moveWindow("Original", 100 + window_width, 0);
         cv::waitKey(0);
         cv::destroyAllWindows();
     }
