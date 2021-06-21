@@ -15,6 +15,8 @@
 #include "nearest-neighbor/nn_tiling.hh"
 #include "utils/io.hh"
 #include <cstdlib>
+#include <time.h>
+#include <chrono>
 
 #define PH 16
 #define PW 16
@@ -27,7 +29,7 @@ int main(int argc, char *argv[]) {
         mode = atoi(argv[1]);
     if (mode == 1)
     {
-        std::string video_path = "../../resources/1_1080p60.MOV";
+        std::string video_path = "../../resources/1.MOV";
         if (argc > 2)
             video_path = argv[2];
         cv::VideoCapture video_cap(video_path);
@@ -35,9 +37,14 @@ int main(int argc, char *argv[]) {
 	        std::cout << "Error opening video stream or file" << std::endl;
 	        return -1;
 	    }
-        double fps = video_cap.get(cv::CAP_PROP_FPS);
+        double vid_fps = video_cap.get(cv::CAP_PROP_FPS);
         double total_frames = video_cap.get(cv::CAP_PROP_FRAME_COUNT);
+        double fps = vid_fps;
+        int frame_ct = 0;
+        double sum = 0;
 	    while(1) {
+
+            auto start = std::chrono::steady_clock::now();
 
 	        cv::Mat frame;
 	        video_cap >> frame;
@@ -64,12 +71,14 @@ int main(int argc, char *argv[]) {
                     index += 1;
                 }
             }
-        
+
             cv::Mat img_color;
             cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
-            cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_HSV);
-            // cv::imshow("window", img_color);
-            
+            cv::applyColorMap(img_color, img_color, cv::COLORMAP_JET);
+            std::string label = "FPS: ";
+            //std::string fps_str = std::string(int(fps));
+            //label.append(fps_str);
+            // cv::putText(frame, label, cv::Point(10, 5), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
             int scale = 0.8;
             int window_width = int(img_color.cols * scale);
             int window_height = int(img_color.rows * scale);
@@ -79,7 +88,19 @@ int main(int argc, char *argv[]) {
             cv::namedWindow("Video", cv::WINDOW_NORMAL);
             cv::resizeWindow("Video", window_width, window_height);
             cv::imshow("Video", frame);
-            
+            auto end = std::chrono::steady_clock::now();
+            double seconds = double(1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+            frame_ct++;
+            sum += seconds;
+            if (frame_ct > 10)
+            {
+                fps = ceil(10 / sum);
+                frame_ct = 0;
+                sum = 0;
+            }
+            std::cout << "Time taken : " << seconds << " seconds" << std::endl;
+            std::cout << "Estimated FPS : " << fps << ", counter : " << frame_ct << std::endl;
+
 	        char c = (char)cv::waitKey(25);
 	        if(c == 27)
 	            break;
@@ -101,7 +122,7 @@ int main(int argc, char *argv[]) {
 
         std::vector<irgpu::histogram8_t> descriptors = irgpu::lbp_cuda(image);
  
-        auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids_t.txt");
+        auto centroids_T = irgpu::load_centroids_transpose("../../resources/centroids.txt");
         auto pred = irgpu::assign_centroids_tiling(descriptors, centroids_T);
 
         irgpu::save_pred(pred, "../../resources/pred_cpp.txt");
@@ -120,8 +141,15 @@ int main(int argc, char *argv[]) {
         
         cv::Mat img_color;
         cv::normalize(reconstructed_image, img_color, 0, 255, cv::NORM_MINMAX);
-        cv::applyColorMap(reconstructed_image, img_color, cv::COLORMAP_HSV);
+        cv::applyColorMap(img_color, img_color, cv::COLORMAP_JET);
+        int scale = 0.8;
+        int window_width = int(img_color.cols * scale);
+        int window_height = int(img_color.rows * scale);
+        cv::namedWindow("Reconstructed", cv::WINDOW_NORMAL);
+        cv::resizeWindow("Reconstructed", window_height, window_width);
         cv::imshow("Reconstructed", img_color);
+        cv::namedWindow("Original", cv::WINDOW_NORMAL);
+        cv::resizeWindow("Original", window_height, window_width);
         cv::imshow("Original", image);
         cv::waitKey(0);
         cv::destroyAllWindows();
