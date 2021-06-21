@@ -16,16 +16,17 @@ target_include_directories(nn PUBLIC
 
 # CUDA lib
 add_library(cuda_nn SHARED "nearest-neighbor/nn_grid.cu"
-                           "nearest-neighbor/nn_tiling.cu")
+                           "nearest-neighbor/nn_tiling.cu"
+                           "lbp/lbp.cu")
                            
 target_compile_features(cuda_nn PUBLIC cxx_std_14)
 set_target_properties(cuda_nn PROPERTIES
                               CUDA_SEPARABLE_COMPILATION ON
-                              CUDA_ARCHITECTURES 75)
+                              CUDA_ARCHITECTURES 86)
 
 # Create executable and link
 add_executable(app main.cpp)
-set_property(TARGET app PROPERTY CUDA_ARCHITECTURES 75)
+set_property(TARGET app PROPERTY CUDA_ARCHITECTURES 86)
 
 target_link_libraries(app PUBLIC 
     "nn"
@@ -35,7 +36,7 @@ target_link_libraries(app PUBLIC
 )
 
 add_executable(bench bench.cpp)
-set_property(TARGET bench PROPERTY CUDA_ARCHITECTURES 75)
+set_property(TARGET bench PROPERTY CUDA_ARCHITECTURES 86)
 
 target_link_libraries(bench PUBLIC 
     "nn"

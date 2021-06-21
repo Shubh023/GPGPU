@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.16)
 
 project(irgpu LANGUAGES CXX CUDA
               VERSION 1.0
@@ -44,6 +44,10 @@ endif()
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -pg")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O0 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-   
+set(CMAKE_CUDA_COMPILE_FEATURES "--expt-relaxed-constexpr --expt-extended-lambda -rdc=true")
+set(CMAKE_CUDA_FLAGS "--expt-relaxed-constexpr --expt-extended-lambda -rdc=true")
+set(CMAKE_CUDA_FLAGS_DEBUG "-G -g -rdc=true")
+
+
 # The compiled library and executable is here
 add_subdirectory(src)
