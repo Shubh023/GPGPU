@@ -1,3 +1,6 @@
+GPGPU - Real-Time barcode detection + segmentation using CUDA
+Authors : amaury.michel@epita.fr, Mederic Carriat, Patel Shubhamkumar
+
 ```
 mkdir build
 cd build
