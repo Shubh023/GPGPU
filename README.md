@@ -1,8 +1,8 @@
-GPGPU - Real-Time barcode detection + segmentation using CUDA
+# GPGPU - Real-Time barcode detection + segmentation using CUDA
 
-Group project for CUDA Programming Course at EPITA
+## Group project for CUDA Programming Course at EPITA
 
-Authors : Amaury Michel, Mederic Carriat, Patel Shubhamkumar
+### Authors : Amaury Michel, Mederic Carriat, Patel Shubhamkumar
 
 ```
 mkdir build
